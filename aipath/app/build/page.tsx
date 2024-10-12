@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -11,66 +11,8 @@ import { Terminal, Calendar as CalendarIcon, Play, Plus, ChevronRight } from "lu
 import Link from "next/link";
 import Header from "@/components/Header";
 import { format } from "date-fns";
+import { workflowData2 } from "@/components/SupabaseCRUD";
 
-// Sample workflow data
-const workflows = [
-  {
-    id: 1,
-    name: "Data Processing Workflow",
-    created: "January 12, 2024",
-    runs: 32,
-    description: "This workflow processes data and generates insights. It helps to clean, transform, and analyze data for better decision-making and reporting."
-  },
-  {
-    id: 2,
-    name: "Email Automation",
-    created: "February 20, 2024",
-    runs: 45,
-    description: "Automate sending emails based on triggers. This workflow is ideal for marketing campaigns, transactional emails, and customer follow-ups."
-  },
-  {
-    id: 3,
-    name: "File Backup",
-    created: "March 5, 2024",
-    runs: 20,
-    description: "Back up files to the cloud automatically. Ensures data safety and quick recovery in case of system failures or data loss."
-  },
-  {
-    id: 4,
-    name: "Image Processing",
-    created: "April 10, 2024",
-    runs: 15,
-    description: "Process and optimize images in bulk. Includes resizing, format conversion, and quality enhancement for efficient image management."
-  },
-  {
-    id: 5,
-    name: "Customer Feedback Analysis",
-    created: "May 15, 2024",
-    runs: 25,
-    description: "Analyze customer feedback from various sources. Helps to identify trends, sentiments, and areas of improvement in customer service."
-  },
-  {
-    id: 6,
-    name: "Social Media Monitoring",
-    created: "June 8, 2024",
-    runs: 18,
-    description: "Monitor social media mentions and trends. Provides insights into brand perception and competitor analysis."
-  },
-  {
-    id: 7,
-    name: "Sales Data Integration",
-    created: "July 22, 2024",
-    runs: 40,
-    description: "Integrate sales data from multiple channels. This workflow helps in creating a unified view of sales performance and forecasting."
-  },
-  {
-    id: 8,
-    name: "Inventory Management",
-    created: "August 3, 2024",
-    runs: 28,
-    description: "Track and manage inventory levels in real-time. Helps to avoid stockouts and overstocking by providing accurate inventory insights."
-  },
-];
 
 // Helper function to check date range
 // Helper function to check date range
@@ -83,10 +25,23 @@ export default function MakePage() {
   const [minRuns, setMinRuns] = useState(""); // Minimum number of runs
   const [minDate, setMinDate] = useState<Date | null>(null); // Updated type to Date | null
 
+  const [workflows, setWorkflowData] = useState([]); // State to hold workflow data
+
+    useEffect(() => {
+        const initializeData = async () => {
+            const data = await workflowData2();
+            console.log(data)
+            setWorkflowData(data); // Set the fetched data to state
+        };
+        initializeData();
+    }, []);
+
+
+
   // Filtered workflows based on the search query, date, and runs
   const filteredWorkflows = workflows.filter((workflow) => {
     const matchesSearch = workflow.name.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesDate = minDate ? isWithinDateRange(workflow.created, minDate) : true;
+    const matchesDate = minDate ? isWithinDateRange(workflow.created_at, minDate) : true;
     const matchesRuns = minRuns ? workflow.runs >= Number(minRuns) : true;
     return matchesSearch && matchesDate && matchesRuns;
   });
@@ -167,10 +122,19 @@ export default function MakePage() {
               <Link key={workflow.id} href={`/workflows/${workflow.id}`} passHref>
                 <Card className="overflow-hidden transition-all duration-300 hover:shadow-lg hover:-translate-y-1 cursor-pointer h-[200px]"> {/* Set consistent height */}
                   <CardHeader >
-                    <CardTitle className="text-lg font-semibold">{workflow.name}</CardTitle> {/* Reduced font size */}
-                    <CardDescription className=" flex items-center">
+
+                  <div className="flex items-center"> 
+              <CardTitle className="text-lg font-semibold">{workflow.name}</CardTitle> {/* Workflow name */}
+              {!workflow.done && (
+                    <span className="text-red-500 text-sm ml-2">Processing</span> 
+                  )}
+              </div>
+ 
+
+                   
+                      <CardDescription className=" flex items-center">
                       <CalendarIcon className="h-4 w-4 mr-2" />
-                      Created on {workflow.created}
+                      Created on {workflow.created_at}
                     </CardDescription>
                   </CardHeader>
                   <CardContent className="pt-2"> {/* Reduced padding */}
@@ -196,3 +160,4 @@ export default function MakePage() {
     </div>
   );
 }
+
