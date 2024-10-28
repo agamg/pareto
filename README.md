@@ -1,4 +1,5 @@
 # AIPath - AI Agents for Automating Complex Web Workflows
+## Scale AI Data Collection for the Agentic World
 ![Screenshot 2024-10-23 at 2 44 14 PM](https://github.com/user-attachments/assets/0948502a-2c1c-4e4a-8095-9368e765e531)
 
 ## Technical Overview
